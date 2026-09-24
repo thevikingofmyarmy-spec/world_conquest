@@ -1,6 +1,6 @@
 {
-  "name":"world-strategy-multiplayer",
-  "version":"1.0.0",
+  "name":"world-strategy-40-player",
+  "version":"2.0.0",
   "private":true,
   "main":"server.js",
   "scripts":{"start":"node server.js"},
