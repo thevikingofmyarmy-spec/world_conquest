@@ -3,117 +3,936 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>World Strategy — Multiplayer</title>
+<title>World Strategy — 40 Player World</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Libre+Baskerville:wght@400;700&display=swap');
-:root{--sea:#174f7a;--sea2:#0d3552;--ink:#17212b;--paper:#eee2c2;--gold:#b28a3c}
-*{box-sizing:border-box}body{margin:0;background:var(--sea2);color:var(--ink);font-family:"Libre Baskerville",Georgia,serif}
-button,input,select{font:inherit}.shell{min-height:100vh;display:grid;grid-template-rows:auto 1fr auto}
-header{background:#102c42;color:#f5e9c8;border-bottom:3px solid var(--gold);padding:12px 18px;display:flex;justify-content:space-between;align-items:center}
-.brand,h1,h2,h3{font-family:Cinzel,Georgia,serif}.brand{font-size:1.35rem}.status{font-size:.85rem}
-main{display:grid;grid-template-columns:220px 1fr;min-height:0}.side{background:#d9c79a;border-right:3px solid var(--gold);padding:18px}
-.side p{font-size:.82rem;line-height:1.5}.panel{background:#f4e8c4f5;margin:14px 0;padding:14px;border:1px solid #9c7b38;box-shadow:0 4px 12px #071a2870}
-.mapwrap{position:relative;min-height:620px;background:var(--sea);overflow:hidden}
-#map{width:100%;height:100%;min-height:620px;background:linear-gradient(#1c6394,#174f7a)}
-.mapgrid{position:absolute;inset:0;background-image:linear-gradient(#ffffff10 1px,transparent 1px),linear-gradient(90deg,#ffffff10 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
-.mapcontent{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#f7edcf;text-align:center}
-.globe{width:min(70vw,760px);height:min(50vw,430px);border:2px solid #d9c79a99;border-radius:50%;position:relative}
-.continent{position:absolute;background:#d8c99f;border:2px solid #8c794e;box-shadow:0 4px 8px #06172566}
-.a{width:230px;height:120px;left:18%;top:18%;transform:rotate(-9deg);border-radius:45% 55% 50% 40%}
-.b{width:170px;height:230px;left:42%;top:27%;transform:rotate(10deg);border-radius:48% 45% 55% 42%}
-.c{width:210px;height:130px;right:11%;top:22%;transform:rotate(6deg);border-radius:55% 42% 50% 44%}
-.d{width:120px;height:210px;right:23%;bottom:8%;transform:rotate(18deg);border-radius:48%}
-.city{position:absolute;width:16px;height:16px;border:2px solid #f5e9c8;border-radius:50%;background:#8a2525;box-shadow:0 0 0 3px #17212b80;cursor:pointer}
-.city span{display:none;position:absolute;left:18px;top:-7px;white-space:nowrap;background:#102c42;color:#f5e9c8;padding:4px 7px;border:1px solid var(--gold);font-size:11px}
-.city:hover span{display:block}
-.overlay{position:absolute;left:16px;right:16px;top:16px;display:flex;justify-content:space-between;pointer-events:none}
-.timebox,.news{background:#102c42e8;color:#f5e9c8;border:1px solid var(--gold);padding:9px 12px;box-shadow:0 4px 12px #06172577}
-.news{max-width:65%;font-size:.8rem}
-footer{background:#102c42;color:#eadcb8;padding:8px 14px;text-align:center;font-size:.75rem}
-.modal{position:fixed;inset:0;background:#061725cc;display:flex;align-items:center;justify-content:center;z-index:20}
-.modal.hidden{display:none}.dialog{width:min(520px,92vw);background:#eee2c2;border:3px double #9c7b38;padding:24px;box-shadow:0 18px 50px #0009}
-.dialog input,.dialog select{width:100%;padding:11px;margin:8px 0 12px;background:#f7edcf;border:1px solid #8c794e;color:var(--ink)}
-.btn{border:1px solid #765b29;background:#c5a15c;color:#1b1b18;padding:9px 13px;cursor:pointer}.btn:hover{background:#d6b875}
-.muted{opacity:.7;font-size:.82rem}.queue{text-align:center;padding:35px}.spinner{width:38px;height:38px;border:4px solid #a48b55;border-top-color:#174f7a;border-radius:50%;animation:spin 1s linear infinite;margin:18px auto}
-@keyframes spin{to{transform:rotate(360deg)}}@media(max-width:800px){main{grid-template-columns:1fr}.side{border-right:0;border-bottom:3px solid var(--gold)}.mapwrap{min-height:500px}.news{max-width:58%}}
+:root{
+  --bg:#07101c;--panel:#0e1829;--panel2:#142139;--line:#273958;
+  --text:#edf4ff;--muted:#91a4c5;--accent:#6ea8ff;--good:#43d39b;
+  --warn:#f1c05f;--bad:#ef7272;--map:#dfe9e4;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font:13px/1.42 Inter,system-ui,-apple-system,Segoe UI,sans-serif;overflow:hidden}
+button,input,select{font:inherit}
+button{color:var(--text)}
+.app{height:100vh;display:grid;grid-template-rows:auto 1fr;min-height:0}
+.top{
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;
+  padding:8px 10px;background:#091321;border-bottom:1px solid var(--line);z-index:50
+}
+.brand{font-weight:950;letter-spacing:.05em;white-space:nowrap}
+.news{
+  min-width:0;border:1px solid #344b70;background:#101d32;border-radius:9px;
+  padding:7px 10px;display:flex;align-items:center;gap:8px;overflow:hidden
+}
+.news b{color:var(--warn);white-space:nowrap}
+#newsText{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.resources{display:flex;gap:5px;justify-content:flex-end}
+.resource{border:1px solid var(--line);background:#111d31;border-radius:8px;padding:5px 8px;white-space:nowrap}
+.layout{display:grid;grid-template-columns:60px minmax(480px,1fr) 350px;min-height:0}
+.rail{background:#091321;border-right:1px solid var(--line);padding:8px 5px;display:flex;flex-direction:column;gap:6px;z-index:30}
+.rail button{
+  position:relative;width:49px;height:45px;padding:0;border:1px solid var(--line);background:#101b2d;
+  border-radius:9px;cursor:pointer;font-size:20px
+}
+.rail button:hover,.rail button.active{background:#1a2b49;border-color:#5e82be}
+.rail button[data-tip]::after{
+  content:attr(data-tip);position:absolute;left:57px;top:50%;transform:translateY(-50%);
+  background:#07101d;color:#f0f5ff;border:1px solid #4b6185;border-radius:7px;padding:7px 9px;
+  font-size:12px;white-space:nowrap;opacity:0;pointer-events:none;transition:.12s;z-index:100
+}
+.rail button:hover::after{opacity:1}
+.mapwrap{position:relative;background:var(--map);min-width:0;min-height:0;overflow:hidden}
+#map{width:100%;height:100%;display:block}
+.country{stroke:#738192;stroke-width:.45;cursor:pointer;transition:.08s}
+.country:hover{filter:brightness(1.07);stroke:#152034;stroke-width:1.2}
+.country.selected{stroke:#0b1422;stroke-width:2}
+.city{fill:#172131;stroke:#fff;stroke-width:1.05;cursor:pointer}
+.city.capital{fill:#c83d3d}
+.city-label{font-size:8px;fill:#172033;pointer-events:none;font-weight:750}
+.army{fill:#2f5fa8;stroke:#fff;stroke-width:1.3;cursor:pointer}
+.ally-army{fill:#27896a}
+.enemy-army{fill:#b84545}
+.route{stroke:#315ea8;stroke-width:1.7;stroke-dasharray:6 5;fill:none;opacity:.7}
+.front{stroke:#b63c3c;stroke-width:2.3;stroke-dasharray:5 4;fill:none;opacity:.9}
+.map-actions{position:absolute;right:10px;top:10px;display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.map-actions button{border:1px solid #bdc8d4;background:#fff;color:#152034;border-radius:7px;padding:6px 8px;cursor:pointer}
+.map-hud{
+  position:absolute;left:10px;bottom:10px;background:#fff;color:#152034;border:1px solid #c3ceda;
+  border-radius:8px;padding:7px 9px;font-size:11px;max-width:360px;box-shadow:0 4px 18px #0002
+}
+.timebox{
+  position:absolute;left:9px;top:50%;transform:translateY(-50%);width:122px;
+  background:#081322ee;color:#eef5ff;border:1px solid #4b6388;border-radius:10px;padding:9px;
+  box-shadow:0 6px 22px #0004;z-index:12
+}
+.timebox .date{font-size:16px;font-weight:900}
+.timebox .clock{font-size:11px;color:#9db0cf;margin-top:2px}
+.timebox .state{margin-top:7px;border-radius:6px;padding:5px 6px;text-align:center;font-weight:850}
+.state.peace{background:#183e35;color:#65e0b2}.state.ready{background:#4b3a17;color:#ffd77c}
+.state.war{background:#4d2024;color:#ff9d9d}
+.timebox .mini{margin-top:6px;font-size:10px;color:#9db0cf}
+.panel{min-height:0;overflow:auto;background:#0c1626;border-left:1px solid var(--line);padding:10px}
+.panel-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.panel-title h2{font-size:15px;margin:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:9px}
+.card h3{font-size:13px;margin:0 0 8px}
+.muted{color:var(--muted)}.small{font-size:11px}
+.btn{
+  width:100%;border:1px solid var(--line);background:#142039;border-radius:8px;padding:8px 9px;
+  cursor:pointer;margin:3px 0;text-align:left
+}
+.btn:hover{background:#1a2a47;border-color:#5579b6}
+.btn.primary{background:#315ea8;border-color:#5b85d0}
+.btn.good{background:#1d5b49;border-color:#328a6d}
+.btn.warn{background:#5a461f;border-color:#a47e35}
+.btn.bad{background:#5a2629;border-color:#a64d52}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.stat{background:#111d30;border:1px solid #253650;border-radius:8px;padding:7px}
+.stat b{display:block;font-size:14px}.stat span{font-size:10px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th,td{padding:6px 5px;border-bottom:1px solid #22314a;text-align:left;vertical-align:top}
+th{color:#a9bbd8;font-weight:800;position:sticky;top:0;background:#101b2d;z-index:2}
+tr:hover td{background:#14223a}
+input,select{
+  width:100%;background:#0b1525;color:var(--text);border:1px solid var(--line);border-radius:7px;
+  padding:7px 8px;outline:none
+}
+input:focus,select:focus{border-color:#5f84c0}
+.pill{display:inline-block;border:1px solid #385070;border-radius:999px;padding:2px 6px;font-size:10px}
+.goodtxt{color:#61ddb0}.warntxt{color:#ffd477}.badtxt{color:#ff9b9b}
+.modal{
+  position:fixed;inset:0;background:#020711aa;display:none;align-items:center;justify-content:center;
+  z-index:100;padding:20px
+}
+.modal.open{display:flex}
+.modalbox{
+  width:min(980px,96vw);max-height:90vh;overflow:auto;background:#0c1627;border:1px solid #405574;
+  border-radius:13px;box-shadow:0 18px 60px #0008;padding:14px
+}
+.modalhead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.close{width:32px;height:32px;border:1px solid var(--line);background:#142039;border-radius:7px;cursor:pointer}
+.sectiontabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.tab{border:1px solid var(--line);background:#101c30;border-radius:7px;padding:6px 9px;cursor:pointer}
+.tab.active{background:#29466f;border-color:#6c91cc}
+.research-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.research{
+  border:1px solid var(--line);background:#111d31;border-radius:9px;padding:9px;cursor:pointer;position:relative
+}
+.research:hover{border-color:#6a8ec8;background:#15243c}
+.research .cost{color:#ffd477;font-size:10px}
+.research .desc{color:#9db0ce;font-size:11px;margin-top:4px}
+.research.locked{opacity:.5}
+.tooltip{
+  position:fixed;pointer-events:none;display:none;z-index:200;background:#07101d;color:#f1f6ff;
+  border:1px solid #526a91;border-radius:8px;padding:8px 10px;max-width:270px;font-size:11px;box-shadow:0 8px 30px #0007
+}
+.lobby-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.slot{border:1px solid #2b3d59;background:#101c30;border-radius:8px;padding:8px}
+.slot b{display:block}.slot small{color:var(--muted)}
+.toast{
+  position:fixed;right:18px;bottom:18px;background:#0b1627;border:1px solid #496181;border-radius:9px;
+  padding:9px 12px;box-shadow:0 8px 30px #0008;display:none;z-index:220
+}
+.toast.show{display:block}
+@media(max-width:950px){
+  .layout{grid-template-columns:58px minmax(360px,1fr) 300px}
+  .resources .resource:nth-child(n+3){display:none}
+}
+
+/* ===== CLASSIC WORLD-STRATEGY THEME ===== */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Libre+Baskerville:wght@400;700&display=swap');
+:root{--bg:#071522;--panel:#102438;--line:#806b43;--text:#f1e5c6;--muted:#b7aa8d;--accent:#c7a45c;--map:#174f7a}
+body{font-family:'Libre Baskerville',Georgia,'Times New Roman',serif;background:var(--bg);color:var(--text)}
+h1,h2,h3,.brand,.panel-title,.btn,.pill,.resource,.rail button{font-family:'Cinzel',Georgia,'Times New Roman',serif}
+.top{background:linear-gradient(#112b42,#081724);border-bottom:2px solid #a7864b;box-shadow:0 4px 16px #0008}
+.brand{letter-spacing:.08em;color:#f3e5c0}.news{background:#0c1d2e;border:1px solid #806b43;border-radius:3px}.news b{color:#e1bd6c}
+.resources .resource{background:#0c1d2e;border:1px solid #5f5138;border-radius:3px;color:#eadcb9}
+.layout{grid-template-columns:64px minmax(520px,1fr) 370px}.rail{background:#091724;border-right:2px solid #725f3d}
+.rail button{background:#10253a;border:1px solid #5d5039;border-radius:3px;color:#eadcb9}.rail button:hover,.rail button.active{background:#1b3852;border-color:#c7a45c}
+.mapwrap{background:#174f7a}.map-hud{background:#0b1d2de8;color:#f0e4c2;border:1px solid #8e7749;border-radius:3px}
+.map-actions button{font-family:'Cinzel',Georgia,serif;background:#eee2c2;color:#17212b;border:1px solid #9a7b43;border-radius:3px}
+.timebox{background:#091a2aee;border:1px solid #9b7c43;border-radius:3px;color:#f1e3bf}
+.panel{background:#0b1928;border-left:2px solid #725f3d}.card{background:#102438;border:1px solid #5e513a;border-radius:3px}
+.stat{background:#0c1f32;border:1px solid #3f5265;border-radius:2px}.btn{background:#17324b;border:1px solid #7e6942;border-radius:3px}
+.btn:hover{background:#21445f;border-color:#c2a05b}.btn.primary{background:#244c69;border-color:#b28f4e}.btn.good{background:#1c4a3a}.btn.bad{background:#542b2a}
+.pill{border-color:#7b6948;border-radius:2px;color:#e6d5ac}input,select{background:#091a2a;color:#f0e4c5;border:1px solid #66583e;border-radius:2px}
+th{background:#132a40;color:#e1d0a6}td{border-bottom-color:#263b50}tr:hover td{background:#18324a}
+.country{fill:#d8caa4!important;stroke:#4f5b61;stroke-width:.55}.country:hover{fill:#e5d8b7!important;stroke:#c39f58;stroke-width:1.4}
+.country.selected{fill:#e0d1aa!important;stroke:#c6a45d;stroke-width:2.2}.city{fill:#24384a;stroke:#f1e4c3}.city.capital{fill:#9b3434}
+.city-label{font-family:'Libre Baskerville',Georgia,serif;fill:#17212b;font-weight:700}
+.modal{background:#03101ce8}.modalbox{background:#0c1b2b;border:1px solid #9c7f49;border-radius:3px;box-shadow:0 20px 70px #000b}
+.close{border-color:#6d5a3e;background:#142b42}.research{background:#0d2135;border-color:#45566a;border-radius:3px}
+.research:hover{border-color:#c2a15b;background:#17344c}
+#networkEntry{position:fixed;inset:0;background:radial-gradient(circle at center,#173c58 0,#071522 58%,#020912 100%);display:flex;align-items:center;justify-content:center;z-index:500;padding:20px}
+#networkEntry.hidden{display:none}.entryBox{width:min(680px,94vw);background:#0b1b2b;border:1px solid #b08c4e;box-shadow:0 25px 100px #000b;padding:34px;text-align:center;border-radius:3px}
+.entryBox h1{font-size:34px;color:#f1e1b9;letter-spacing:.08em}.entryBox .crest{font-size:44px}.entryBox p{color:#b8ad94;max-width:540px;margin:10px auto 18px}
+.entryBox input{font-size:16px;text-align:center;padding:13px;margin-bottom:10px}.entryBox .entryBtn{width:100%;padding:13px;text-align:center;font-size:15px}
+.entryStatus{min-height:20px;margin-top:10px;color:#e0bd70}.loadingRing{width:34px;height:34px;border:3px solid #5d533f;border-top-color:#c6a45d;border-radius:50%;animation:spin 1s linear infinite;margin:18px auto}
+.lobbyGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.liveSlot{border:1px solid #4d5b68;background:#0d2134;padding:7px;border-radius:2px;min-height:62px}.liveSlot.you{border-color:#c7a45c}.liveSlot .num{font-size:10px;color:#8fa2b6}.liveSlot .name{font-weight:700}.liveSlot .country{font-size:10px;color:#b9ad93}
 </style>
 </head>
 <body>
-<div class="shell">
-<header><div class="brand">WORLD STRATEGY</div><div id="connection" class="status">Not connected</div></header>
-<main>
-<aside class="side">
-<h2>Command</h2>
-<div class="panel"><b id="playerLabel">No player</b><p id="countryLabel">Country not selected</p><p id="lobbyLabel">Lobby —</p></div>
-<div class="panel"><h3>War News</h3><div id="newsArchive" class="muted">No war notices yet.</div></div>
-<div class="panel"><h3>Rules</h3><p>40 players maximum per lobby. Assignment is automatic. News is limited to war justification and declaration notices.</p></div>
-</aside>
-<section class="mapwrap">
-<div id="map"><div class="mapgrid"></div><div class="mapcontent"><div class="globe">
-<div class="continent a"></div><div class="continent b"></div><div class="continent c"></div><div class="continent d"></div>
-<div class="city" style="left:30%;top:38%"><span>London</span></div>
-<div class="city" style="left:47%;top:45%"><span>Cairo</span></div>
-<div class="city" style="left:66%;top:39%"><span>Delhi</span></div>
-<div class="city" style="left:76%;top:57%"><span>Tokyo</span></div>
-<div class="city" style="left:25%;top:57%"><span>Washington</span></div>
-<div class="city" style="left:54%;top:67%"><span>Cape Town</span></div>
-</div></div></div>
-<div class="overlay"><div class="timebox" id="timebox">DAY 30 · PRE-WAR</div><div class="news" id="newsTicker">Awaiting the first diplomatic notice.</div></div>
-</section>
-</main>
-<footer>Prototype multiplayer client · 40-player lobby capacity</footer>
+<div id="networkEntry">
+  <div class="entryBox">
+    <div class="crest">🌍</div>
+    <h1>WORLD STRATEGY</h1>
+    <p>Enter your name to join the world. The server assigns you to the first available 40-player campaign. Your country becomes permanent after confirmation.</p>
+    <input id="playerNameInput" maxlength="20" autocomplete="off" placeholder="Enter your player name">
+    <button class="btn primary entryBtn" id="playerJoinBtn">ENTER THE WORLD</button>
+    <div id="networkStatus" class="entryStatus">Ready.</div>
+    <div id="lobbyLoading" style="display:none"><div class="loadingRing"></div><div class="muted">Assigning your lobby…</div></div>
+  </div>
 </div>
 
-<div id="entryModal" class="modal">
-<div class="dialog"><h1>Enter the World</h1>
-<p>Choose your player name. Your name will be registered to the country you later select.</p>
-<input id="nameInput" maxlength="20" placeholder="Player name" autocomplete="off">
-<button id="joinBtn" class="btn">ENTER WORLD</button><p id="entryError" class="muted"></p>
-</div></div>
+<div class="app">
+  <header class="top">
+    <div class="brand">🌍 WORLD STRATEGY <span id="playerBadge" class="lobbyBadge" style="margin-left:8px">GUEST</span></div>
+    <div class="news"><b>⚔️ WAR NEWS</b><span id="newsText">Loading world situation…</span></div>
+    <div class="resources">
+      <div class="resource" title="Political stability. Low stability increases the chance of internal problems.">🏛️ <span id="resStability">72</span></div>
+      <div class="resource" title="Diplomatic points used for diplomacy and treaties.">🤝 <span id="resDip">40</span></div>
+      <div class="resource" title="Manpower available for creating formations.">👥 <span id="resMan">50k</span></div>
+      <div class="resource" title="Treasury used for projects and strategic actions.">💰 <span id="resMoney">500</span></div>
+    </div>
+  </header>
 
-<div id="queueModal" class="modal hidden"><div class="dialog queue">
-<h1>Entering World...</h1><div class="spinner"></div><div id="queueText">Finding an open lobby...</div>
-<p class="muted">Please wait while the server assigns your lobby.</p></div></div>
+  <div class="layout">
+    <nav class="rail">
+      <button class="active" data-panel="overview" data-tip="🏠 Overview">🏠</button>
+      <button data-panel="country" data-tip="🏳️ Country">🏳️</button>
+      <button data-panel="diplomacy" data-tip="🤝 Diplomacy">🤝</button>
+      <button data-panel="research" data-tip="🧪 Research">🧪</button>
+      <button data-panel="forces" data-tip="🪖 Forces">🪖</button>
+      <button data-panel="economy" data-tip="💰 Economy">💰</button>
+      <button data-panel="politics" data-tip="🏛️ Politics">🏛️</button>
+      <button data-panel="news" data-tip="📰 News log">📰</button>
+      <button data-panel="lobby" data-tip="👥 Multiplayer lobby">👥</button>
+      <button data-panel="settings" data-tip="⚙️ Campaign">⚙️</button>
+    </nav>
 
-<div id="countryModal" class="modal hidden"><div class="dialog">
-<h1>Choose Your Country</h1><p id="countryHelp">Select a country. Your choice is permanent for this campaign.</p>
-<select id="countrySelect"><option>France</option><option>Germany</option><option>India</option><option>Japan</option><option>Brazil</option><option>United Kingdom</option><option>United States</option><option>Canada</option><option>Egypt</option><option>Australia</option></select>
-<button id="confirmCountry" class="btn">CONFIRM COUNTRY</button><p id="countryError" class="muted"></p>
-</div></div>
+    <main class="mapwrap">
+      <svg id="map" aria-label="Interactive world map"></svg>
+      <div class="timebox" title="Game time. The pre-war countdown reaches zero before war declarations become available.">
+        <div class="date" id="gameDate">DAY 30</div>
+        <div class="clock" id="gameClock">Year 1 · 00:00</div>
+        <div class="state peace" id="gameState">PRE-WAR</div>
+        <div class="mini" id="countdownText">War declarations unlock at DAY 0.</div>
+      </div>
+      <div class="map-actions">
+        <button id="pauseBtn" title="Pause or resume game time">⏸ Pause</button>
+        <button id="speedBtn" title="Change simulation speed">⚡ 1×</button>
+        <button id="modeBtn" title="Cycle map mode">🗺 Political</button>
+      </div>
+      <div class="map-hud" id="mapHud">Hover a country or city. Click a country to inspect it.</div>
+    </main>
 
-<div id="warModal" class="modal hidden"><div class="dialog">
-<h1 id="warTitle">DIPLOMATIC NOTICE</h1><p id="warMessage"></p>
-<button class="btn" onclick="document.getElementById('warModal').classList.add('hidden')">CLOSE</button>
-</div></div>
+    <aside class="panel" id="panel"></aside>
+  </div>
+</div>
 
+<div class="modal" id="modal">
+  <div class="modalbox">
+    <div class="modalhead"><h2 id="modalTitle">Panel</h2><button class="close" id="modalClose">✕</button></div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+<div class="tooltip" id="tooltip"></div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script>
-const state={ws:null,playerName:"",country:"",lobbyId:""};
-const $=id=>document.getElementById(id);
-const params=new URLSearchParams(location.search);
-const WS_URL=params.get("server") || ((location.protocol==="https:"?"wss://":"ws://")+location.host);
-function setConnection(t){$("connection").textContent=t}
-function show(id){$(id).classList.remove("hidden")} function hide(id){$(id).classList.add("hidden")}
-function addNews(text){$("newsTicker").textContent=text;const line=document.createElement("div");line.textContent=text;line.style.marginBottom="8px";const a=$("newsArchive");if(a.classList.contains("muted"))a.classList.remove("muted");a.prepend(line)}
-function popup(title,msg){$("warTitle").textContent=title;$("warMessage").textContent=msg;show("warModal")}
-function send(type,payload={}){if(state.ws?.readyState===WebSocket.OPEN)state.ws.send(JSON.stringify({type,...payload}))}
-function connect(){
-try{state.ws=new WebSocket(WS_URL)}catch(e){$("entryError").textContent="Could not create a connection.";return}
-state.ws.onopen=()=>{setConnection("Connected");send("JOIN_QUEUE",{name:state.playerName})};
-state.ws.onclose=()=>setConnection("Disconnected — refresh to reconnect");
-state.ws.onerror=()=>setConnection("Connection error");
-state.ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch{return}
-if(m.type==="QUEUE"){hide("entryModal");show("queueModal");$("queueText").textContent="Lobby "+m.lobbyId+" · "+m.count+"/40 players"}
-if(m.type==="LOBBY_ASSIGNED"){state.lobbyId=m.lobbyId;$("lobbyLabel").textContent="Lobby "+m.lobbyId;hide("queueModal");show("countryModal");$("countryHelp").textContent="Lobby "+m.lobbyId+" is ready. Select your country."}
-if(m.type==="COUNTRY_CONFIRMED"){state.country=m.country;$("playerLabel").textContent=state.playerName;$("countryLabel").textContent=m.country;hide("countryModal")}
-if(m.type==="COUNTRY_TAKEN")$("countryError").textContent="That country is already controlled by another player in this lobby.";
-if(m.type==="WAR_JUSTIFIED"){const t=m.attacker+" ("+m.attackerCountry+") has justified a war against "+m.defender+" ("+m.defenderCountry+").";addNews("WAR JUSTIFIED — "+t);if(m.targetPlayer===state.playerName)popup("DIPLOMATIC NOTICE",t)}
-if(m.type==="WAR_DECLARED"){const t=m.attacker+" ("+m.attackerCountry+") has declared war upon "+m.defender+" ("+m.defenderCountry+").";addNews("WAR DECLARED — "+t);if(m.targetPlayer===state.playerName)popup("WAR DECLARED",t)}
-if(m.type==="DAY_UPDATE")$("timebox").textContent="DAY "+m.day+" · "+(m.day===0?"WAR WINDOW":"PRE-WAR");
-if(m.type==="ERROR")$("entryError").textContent=m.message||"Server error.";
-}}
-$("joinBtn").onclick=()=>{const n=$("nameInput").value.trim();if(n.length<2){$("entryError").textContent="Name must be at least 2 characters.";return}state.playerName=n;connect()};
-$("confirmCountry").onclick=()=>send("SELECT_COUNTRY",{country:$("countrySelect").value});
-$("nameInput").addEventListener("keydown",e=>{if(e.key==="Enter")$("joinBtn").click()});
+(() => {
+"use strict";
+
+/* =========================================================
+   WORLD STRATEGY LAB
+   - Abstract grand-strategy mechanics only.
+   - Real-time multiplayer requires a server; this build
+     includes a lobby UI and local simulation so the front-end
+     can be tested without a backend.
+   ========================================================= */
+
+const $ = id => document.getElementById(id);
+const state = {
+  country: null,
+  countryName: null,
+  government: "Democracy",
+  day: 30,
+  year: 1,
+  hour: 0,
+  minute: 0,
+  running: true,
+  speed: 1,
+  mode: "Political",
+  stability: 72,
+  dip: 40,
+  manpower: 50000,
+  money: 500,
+  research: 0,
+  formations: [],
+  wars: [],
+  allies: [],
+  enemies: [],
+  relations: {},
+  news: [],
+  selectedCountry: null,
+  selectedCity: null,
+  cities: [],
+  countries: [],
+  cityByCountry: {},
+  zoom: 1,
+  playerName: "",
+  playerId: "",
+  lobbyId: "",
+  socket: null,
+  connected: false,
+  serverLobbyPlayers: [],
+  countryLocked: false,
+  lobby: {code:"—", host:"Server", slots:[]}
+};
+
+const GOVS = ["Democracy","Monarchy","Communism","Fascism"];
+const mapSvg = d3.select("#map");
+const mapNode = $("map");
+const g = mapSvg.append("g");
+const countryLayer = g.append("g");
+const cityLayer = g.append("g");
+const routeLayer = g.append("g");
+const armyLayer = g.append("g");
+let projection, path, worldFeatures = [];
+let worldData = null;
+let cityDataLoaded = false;
+let lastTick = performance.now();
+let newsIndex = 0;
+let toastTimer = null;
+
+const defaultGov = {
+  "United States of America":"Democracy","Canada":"Democracy","Mexico":"Democracy",
+  "Brazil":"Democracy","Argentina":"Democracy","Chile":"Democracy","Colombia":"Democracy",
+  "Peru":"Democracy","Uruguay":"Democracy","Paraguay":"Democracy","Bolivia":"Democracy",
+  "United Kingdom":"Monarchy","Spain":"Monarchy","Norway":"Monarchy","Sweden":"Monarchy",
+  "Denmark":"Monarchy","Netherlands":"Monarchy","Belgium":"Monarchy","Japan":"Monarchy",
+  "Thailand":"Monarchy","Saudi Arabia":"Monarchy","Jordan":"Monarchy",
+  "Russia":"Democracy","China":"Communism","Cuba":"Communism","Vietnam":"Communism",
+  "Laos":"Communism","North Korea":"Communism",
+  "India":"Democracy","Pakistan":"Democracy","Bangladesh":"Democracy","Indonesia":"Democracy",
+  "Australia":"Monarchy","New Zealand":"Monarchy","Morocco":"Monarchy",
+  "South Africa":"Democracy","Nigeria":"Democracy","Kenya":"Democracy","Ghana":"Democracy",
+  "Egypt":"Democracy","Turkey":"Democracy","Ukraine":"Democracy","Poland":"Democracy",
+  "France":"Democracy","Germany":"Democracy","Italy":"Democracy","Greece":"Democracy"
+};
+
+/* A compact fallback list ensures every mapped country has nodes even
+   when the populated-places dataset is unavailable or lacks a country. */
+const fallbackCities = {
+"Afghanistan":["Kabul","Herat","Kandahar"],"Albania":["Tirana","Durrës","Shkodër"],
+"Algeria":["Algiers","Oran","Constantine"],"Andorra":["Andorra la Vella"],
+"Angola":["Luanda","Huambo","Lobito"],"Antigua and Barbuda":["St. John's"],
+"Argentina":["Buenos Aires","Córdoba","Rosario","Mendoza"],"Armenia":["Yerevan","Gyumri","Vanadzor"],
+"Australia":["Canberra","Sydney","Melbourne","Brisbane","Perth"],"Austria":["Vienna","Graz","Linz"],
+"Azerbaijan":["Baku","Ganja","Sumqayit"],"Bahamas":["Nassau","Freeport"],"Bahrain":["Manama","Riffa"],
+"Bangladesh":["Dhaka","Chattogram","Khulna"],"Barbados":["Bridgetown"],"Belarus":["Minsk","Gomel","Brest"],
+"Belgium":["Brussels","Antwerp","Ghent"],"Belize":["Belmopan","Belize City"],"Benin":["Porto-Novo","Cotonou"],
+"Bhutan":["Thimphu","Phuntsholing"],"Bolivia":["Sucre","La Paz","Santa Cruz"],"Bosnia and Herzegovina":["Sarajevo","Banja Luka"],
+"Botswana":["Gaborone","Francistown"],"Brazil":["Brasília","São Paulo","Rio de Janeiro","Salvador","Manaus"],
+"Brunei":["Bandar Seri Begawan"],"Bulgaria":["Sofia","Plovdiv","Varna"],"Burkina Faso":["Ouagadougou","Bobo-Dioulasso"],
+"Burundi":["Gitega","Bujumbura"],"Cabo Verde":["Praia","Mindelo"],"Cambodia":["Phnom Penh","Siem Reap","Battambang"],
+"Cameroon":["Yaoundé","Douala","Garoua"],"Canada":["Ottawa","Toronto","Montreal","Vancouver","Calgary"],
+"Central African Republic":["Bangui","Berbérati"],"Chad":["N'Djamena","Moundou"],"Chile":["Santiago","Valparaíso","Concepción"],
+"China":["Beijing","Shanghai","Guangzhou","Shenzhen","Chengdu"],"Colombia":["Bogotá","Medellín","Cali","Barranquilla"],
+"Comoros":["Moroni","Mutsamudu"],"Congo":["Brazzaville","Pointe-Noire"],"Costa Rica":["San José","Limón"],
+"Croatia":["Zagreb","Split","Rijeka"],"Cuba":["Havana","Santiago de Cuba","Camagüey"],"Cyprus":["Nicosia","Limassol"],
+"Czechia":["Prague","Brno","Ostrava"],"Democratic Republic of the Congo":["Kinshasa","Lubumbashi","Mbuji-Mayi"],
+"Denmark":["Copenhagen","Aarhus","Odense"],"Djibouti":["Djibouti","Ali Sabieh"],"Dominica":["Roseau"],
+"Dominican Republic":["Santo Domingo","Santiago de los Caballeros"],"Ecuador":["Quito","Guayaquil","Cuenca"],
+"Egypt":["Cairo","Alexandria","Giza","Luxor"],"El Salvador":["San Salvador","Santa Ana"],"Equatorial Guinea":["Malabo","Bata"],
+"Eritrea":["Asmara","Keren"],"Estonia":["Tallinn","Tartu"],"Eswatini":["Mbabane","Manzini"],
+"Ethiopia":["Addis Ababa","Dire Dawa","Mekelle"],"Fiji":["Suva","Nadi"],"Finland":["Helsinki","Tampere","Turku"],
+"France":["Paris","Marseille","Lyon","Toulouse","Nice"],"Gabon":["Libreville","Port-Gentil"],
+"Gambia":["Banjul","Serekunda"],"Georgia":["Tbilisi","Batumi","Kutaisi"],"Germany":["Berlin","Hamburg","Munich","Cologne","Frankfurt"],
+"Ghana":["Accra","Kumasi","Tamale"],"Greece":["Athens","Thessaloniki","Patras"],"Grenada":["St. George's"],
+"Guatemala":["Guatemala City","Quetzaltenango"],"Guinea":["Conakry","Kankan"],"Guinea-Bissau":["Bissau"],
+"Guyana":["Georgetown","Linden"],"Haiti":["Port-au-Prince","Cap-Haïtien"],"Honduras":["Tegucigalpa","San Pedro Sula"],
+"Hungary":["Budapest","Debrecen","Szeged"],"Iceland":["Reykjavík","Akureyri"],"India":["New Delhi","Mumbai","Delhi","Kolkata","Bengaluru","Chennai","Hyderabad"],
+"Indonesia":["Jakarta","Surabaya","Bandung","Medan","Makassar"],"Iran":["Tehran","Mashhad","Isfahan","Shiraz"],
+"Iraq":["Baghdad","Basra","Mosul"],"Ireland":["Dublin","Cork","Limerick"],"Israel":["Jerusalem","Tel Aviv","Haifa"],
+"Italy":["Rome","Milan","Naples","Turin","Palermo"],"Jamaica":["Kingston","Montego Bay"],"Japan":["Tokyo","Osaka","Kyoto","Nagoya","Sapporo"],
+"Jordan":["Amman","Zarqa","Irbid"],"Kazakhstan":["Astana","Almaty","Shymkent"],"Kenya":["Nairobi","Mombasa","Kisumu"],
+"Kiribati":["South Tarawa"],"Kuwait":["Kuwait City","Al Ahmadi"],"Kyrgyzstan":["Bishkek","Osh"],"Laos":["Vientiane","Luang Prabang"],
+"Latvia":["Riga","Daugavpils"],"Lebanon":["Beirut","Tripoli"],"Lesotho":["Maseru"],"Liberia":["Monrovia","Gbarnga"],
+"Libya":["Tripoli","Benghazi","Misrata"],"Liechtenstein":["Vaduz"],"Lithuania":["Vilnius","Kaunas","Klaipėda"],
+"Luxembourg":["Luxembourg"],"Madagascar":["Antananarivo","Toamasina"],"Malawi":["Lilongwe","Blantyre"],
+"Malaysia":["Kuala Lumpur","George Town","Johor Bahru","Kuching"],"Maldives":["Malé"],"Mali":["Bamako","Sikasso"],
+"Malta":["Valletta","Birkirkara"],"Marshall Islands":["Majuro"],"Mauritania":["Nouakchott","Nouadhibou"],
+"Mauritius":["Port Louis"],"Mexico":["Mexico City","Guadalajara","Monterrey","Puebla"],"Micronesia":["Palikir","Weno"],
+"Moldova":["Chișinău","Bălți"],"Monaco":["Monaco"],"Mongolia":["Ulaanbaatar","Erdenet"],"Montenegro":["Podgorica","Nikšić"],
+"Morocco":["Rabat","Casablanca","Marrakesh","Tangier"],"Mozambique":["Maputo","Matola","Beira"],"Myanmar":["Naypyidaw","Yangon","Mandalay"],
+"Namibia":["Windhoek","Walvis Bay"],"Nauru":["Yaren"],"Nepal":["Kathmandu","Pokhara","Biratnagar"],"Netherlands":["Amsterdam","Rotterdam","The Hague","Utrecht"],
+"New Zealand":["Wellington","Auckland","Christchurch"],"Nicaragua":["Managua","León"],"Niger":["Niamey","Zinder"],
+"Nigeria":["Abuja","Lagos","Kano","Ibadan"],"North Korea":["Pyongyang","Hamhung"],"North Macedonia":["Skopje","Bitola"],
+"Norway":["Oslo","Bergen","Trondheim"],"Oman":["Muscat","Salalah"],"Pakistan":["Islamabad","Karachi","Lahore","Peshawar"],
+"Palau":["Ngerulmud","Koror"],"Panama":["Panama City","Colón"],"Papua New Guinea":["Port Moresby","Lae"],
+"Paraguay":["Asunción","Ciudad del Este"],"Peru":["Lima","Arequipa","Cusco"],"Philippines":["Manila","Cebu City","Davao"],
+"Poland":["Warsaw","Kraków","Gdańsk","Wrocław"],"Portugal":["Lisbon","Porto","Braga"],"Qatar":["Doha","Al Rayyan"],
+"Romania":["Bucharest","Cluj-Napoca","Timișoara"],"Russia":["Moscow","Saint Petersburg","Novosibirsk","Yekaterinburg","Vladivostok"],
+"Rwanda":["Kigali","Butare"],"Saint Kitts and Nevis":["Basseterre"],"Saint Lucia":["Castries"],
+"Saint Vincent and the Grenadines":["Kingstown"],"Samoa":["Apia"],"San Marino":["San Marino"],
+"São Tomé and Príncipe":["São Tomé"],"Saudi Arabia":["Riyadh","Jeddah","Mecca","Medina"],"Senegal":["Dakar","Touba"],
+"Serbia":["Belgrade","Novi Sad","Niš"],"Seychelles":["Victoria"],"Sierra Leone":["Freetown","Bo"],
+"Singapore":["Singapore"],"Slovakia":["Bratislava","Košice"],"Slovenia":["Ljubljana","Maribor"],
+"Solomon Islands":["Honiara"],"Somalia":["Mogadishu","Hargeisa"],"South Africa":["Pretoria","Cape Town","Johannesburg","Durban"],
+"South Korea":["Seoul","Busan","Incheon","Daegu"],"South Sudan":["Juba","Wau"],"Spain":["Madrid","Barcelona","Valencia","Seville"],
+"Sri Lanka":["Sri Jayawardenepura Kotte","Colombo","Kandy"],"Sudan":["Khartoum","Omdurman","Port Sudan"],
+"Suriname":["Paramaribo"],"Sweden":["Stockholm","Gothenburg","Malmö"],"Switzerland":["Bern","Zurich","Geneva"],
+"Syria":["Damascus","Aleppo","Homs"],"Taiwan":["Taipei","Kaohsiung","Taichung"],"Tajikistan":["Dushanbe","Khujand"],
+"Tanzania":["Dodoma","Dar es Salaam","Arusha"],"Thailand":["Bangkok","Chiang Mai","Phuket"],"Timor-Leste":["Dili"],
+"Togo":["Lomé","Sokodé"],"Tonga":["Nuku'alofa"],"Trinidad and Tobago":["Port of Spain","San Fernando"],
+"Tunisia":["Tunis","Sfax","Sousse"],"Turkey":["Ankara","Istanbul","Izmir","Bursa"],"Turkmenistan":["Ashgabat","Türkmenabat"],
+"Tuvalu":["Funafuti"],"Uganda":["Kampala","Gulu","Mbarara"],"Ukraine":["Kyiv","Kharkiv","Odesa","Lviv"],
+"United Arab Emirates":["Abu Dhabi","Dubai","Sharjah"],"United Kingdom":["London","Manchester","Birmingham","Glasgow"],
+"United States of America":["Washington, D.C.","New York","Los Angeles","Chicago","Houston"],"Uruguay":["Montevideo","Salto"],
+"Uzbekistan":["Tashkent","Samarkand","Namangan"],"Vanuatu":["Port Vila","Luganville"],"Vatican City":["Vatican City"],
+"Venezuela":["Caracas","Maracaibo","Valencia"],"Vietnam":["Hanoi","Ho Chi Minh City","Da Nang"],"Yemen":["Sana'a","Aden","Taiz"],
+"Zambia":["Lusaka","Kitwe"],"Zimbabwe":["Harare","Bulawayo"]
+};
+
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function toast(msg){$("toast").textContent=msg;$("toast").classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>$("toast").classList.remove("show"),2600);}
+function addNews(text){
+  const t=String(text||"");
+  if(!/justif|declared war|war against|war upon/i.test(t))return;
+  state.news.unshift({day:state.day,text:t});
+  state.news=state.news.slice(0,80);
+  $("newsText").textContent=t;
+  newsIndex=0;
+}
+
+function setNewsTicker(){
+  if(!state.news.length)return;
+  $("newsText").textContent=state.news[newsIndex % state.news.length].text;
+  newsIndex++;
+}
+function fmt(n){return new Intl.NumberFormat().format(Math.round(n));}
+function fmtK(n){return n>=1000000?(n/1000000).toFixed(1)+"M":n>=1000?(n/1000).toFixed(1)+"k":fmt(n);}
+function getCountryName(feature){return feature?.properties?.name || feature?.properties?.NAME || "Unknown";}
+function govFor(name){return defaultGov[name] || "Democracy";}
+function colorFor(f){
+  const name=getCountryName(f), gov=govFor(name);
+  if(state.mode==="Government") return gov==="Democracy"?"#79aef5":gov==="Monarchy"?"#d5ad62":gov==="Communism"?"#d96b6b":"#b78be0";
+  if(state.mode==="Stability") return name===state.countryName?"#62cfa3":"#b9c4d0";
+  if(state.mode==="Diplomacy"){
+    if(state.enemies.includes(name))return "#c85d5d";
+    if(state.allies.includes(name))return "#55b992";
+    if(name===state.countryName)return "#4e8de0";
+  }
+  return name===state.countryName?"#6f9ee4":"#c8d4d0";
+}
+
+async function loadWorld(){
+  try{
+    worldData=await fetch("https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json").then(r=>r.json());
+    worldFeatures=topojson.feature(worldData,worldData.objects.countries).features;
+    state.countries=worldFeatures.map(f=>getCountryName(f)).filter(n=>n && n!=="Antarctica");
+    renderMap();
+    await loadCities();
+  }catch(e){
+    console.error(e);
+    $("mapHud").textContent="Map data could not load. Check your internet connection, then refresh.";
+    addNews("Map data failed to load — campaign UI remains available.");
+  }
+}
+async function loadCities(){
+  try{
+    const places=await fetch("https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_populated_places_simple.geojson").then(r=>r.json());
+    const actual=places.features.map(f=>{
+      const p=f.properties||{}, c=p.adm0name || p.sov0name;
+      return {name:p.name, country:c, lon:+p.longitude, lat:+p.latitude, capital:+p.adm0cap===1, pop:+(p.pop_max||0)};
+    }).filter(x=>x.country && Number.isFinite(x.lon)&&Number.isFinite(x.lat));
+    const by={};
+    for(const c of actual){(by[c.country]??=[]).push(c);}
+    for(const name of state.countries){
+      let list=(by[name]||[]).sort((a,b)=>b.pop-a.pop).slice(0,8);
+      if(!list.length){
+        const f=worldFeatures.find(x=>getCountryName(x)===name);
+        if(f){
+          const cent=d3.geoCentroid(f);
+          list=(fallbackCities[name]||[name+" Capital",name+" North Hub",name+" South Hub"]).slice(0,4)
+            .map((n,i)=>({name:n,country:name,lon:cent[0]+(i%2)*1.1-0.55,lat:cent[1]+Math.floor(i/2)*.8-.4,capital:i===0,pop:0}));
+        }
+      } else if((fallbackCities[name]||[]).length && list.length<3){
+        const f=worldFeatures.find(x=>getCountryName(x)===name);
+        const cent=f?d3.geoCentroid(f):[0,0];
+        for(const n of fallbackCities[name]){
+          if(list.length>=3)break;
+          if(!list.some(x=>x.name===n))list.push({name:n,country:name,lon:cent[0]+Math.random()-.5,lat:cent[1]+Math.random()-.5,capital:list.length===0,pop:0});
+        }
+      }
+      by[name]=list.slice(0,8);
+    }
+    state.cityByCountry=by;
+    state.cities=Object.values(by).flat();
+    cityDataLoaded=true;
+    renderCities();
+    addNews(`Global city network loaded: ${fmt(state.cities.length)} city nodes available.`);
+  }catch(e){
+    console.warn(e);
+    cityDataLoaded=false;
+    state.cities=[];
+    for(const name of state.countries){
+      const f=worldFeatures.find(x=>getCountryName(x)===name);
+      if(!f)continue;
+      const cent=d3.geoCentroid(f);
+      const names=fallbackCities[name]||[name+" Capital",name+" North Hub",name+" South Hub"];
+      state.cityByCountry[name]=names.slice(0,4).map((n,i)=>({name:n,country:name,lon:cent[0]+(i%2)*1-0.5,lat:cent[1]+Math.floor(i/2)*.8-.4,capital:i===0,pop:0}));
+      state.cities.push(...state.cityByCountry[name]);
+    }
+    renderCities();
+    addNews("Using built-in fallback city nodes.");
+  }
+}
+function resize(){
+  const w=mapNode.clientWidth,h=mapNode.clientHeight;
+  mapSvg.attr("viewBox",`0 0 ${w} ${h}`);
+  projection=d3.geoNaturalEarth1().fitSize([w,h],{type:"Sphere"});
+  path=d3.geoPath(projection);
+  countryLayer.selectAll("path").attr("d",path);
+  renderCities();renderArmies();
+}
+function renderMap(){
+  countryLayer.selectAll("path").remove();
+  countryLayer.selectAll("path").data(worldFeatures).join("path")
+    .attr("class","country")
+    .attr("fill",d=>colorFor(d))
+    .attr("d",path)
+    .on("mouseenter",(e,d)=>showCountryTooltip(e,d))
+    .on("mousemove",moveTooltip)
+    .on("mouseleave",hideTooltip)
+    .on("click",(e,d)=>selectCountry(getCountryName(d)));
+  renderCities();
+}
+function renderCities(){
+  if(!projection)return;
+  const visible=state.cities.filter(c=>state.zoom>=1.15 || c.capital || c.country===state.countryName);
+  cityLayer.selectAll("g.citynode").data(visible,d=>d.country+"|"+d.name).join(
+    enter=>{
+      const node=enter.append("g").attr("class","citynode");
+      node.append("circle").attr("class",d=>d.capital?"city capital":"city").attr("r",d=>d.capital?3.4:2.1);
+      node.append("text").attr("class","city-label").attr("x",5).attr("y",3).text(d=>d.name);
+      return node;
+    },
+    update=>update,
+    exit=>exit.remove()
+  ).attr("transform",d=>{const p=projection([d.lon,d.lat]);return `translate(${p[0]},${p[1]})`;})
+   .on("mouseenter",(e,d)=>showCityTooltip(e,d)).on("mousemove",moveTooltip).on("mouseleave",hideTooltip)
+   .on("click",(e,d)=>{state.selectedCity=d;renderPanel("country");});
+}
+function renderArmies(){
+  if(!projection)return;
+  armyLayer.selectAll("g.armyNode").data(state.formations,d=>d.id).join(
+    enter=>{
+      const n=enter.append("g").attr("class","armyNode");
+      n.append("circle").attr("class",d=>d.side==="enemy"?"army enemy-army":d.side==="ally"?"army ally-army":"army").attr("r",5);
+      n.append("text").attr("class","city-label").attr("x",7).attr("y",3).text(d=>d.name);
+      return n;
+    },update=>update,exit=>exit.remove()
+  ).attr("transform",d=>{
+    const city=state.cities.find(c=>c.name===d.city&&c.country===d.country);
+    if(!city)return "translate(-100,-100)";
+    const p=projection([city.lon,city.lat]);return `translate(${p[0]},${p[1]})`;
+  }).on("mouseenter",(e,d)=>{showTooltip(e,`<b>${esc(d.name)}</b><br>${esc(d.side)} formation<br>Size: ${fmt(d.size)}<br>Readiness: ${d.readiness}%`);})
+    .on("mousemove",moveTooltip).on("mouseleave",hideTooltip);
+}
+function showTooltip(e,html){$("tooltip").innerHTML=html;$("tooltip").style.display="block";moveTooltip(e);}
+function moveTooltip(e){const t=$("tooltip"),pad=14;t.style.left=Math.min(innerWidth-t.offsetWidth-pad,e.clientX+12)+"px";t.style.top=Math.min(innerHeight-t.offsetHeight-pad,e.clientY+12)+"px";}
+function hideTooltip(){$("tooltip").style.display="none";}
+function showCountryTooltip(e,d){
+  const n=getCountryName(d),cities=(state.cityByCountry[n]||[]).length,gov=govFor(n);
+  showTooltip(e,`<b>${esc(n)}</b><br>Government: ${gov}<br>City nodes: ${cities}<br>Relation: ${state.relations[n]??0}`);
+}
+function showCityTooltip(e,d){showTooltip(e,`<b>${esc(d.name)}</b><br>${esc(d.country)}<br>${d.capital?"Capital city":"City node"}${d.pop?`<br>Population: ${fmtK(d.pop)}`:""}`);}
+function selectCountry(name){
+  if(!name||name==="Antarctica")return;
+  state.selectedCountry=name;
+  $("mapHud").textContent=`Selected: ${name}. Open 🏳️ Country for details or 🤝 Diplomacy for relations.`;
+  renderMap();renderCities();renderPanel($("panel").dataset.panel||"overview");
+}
+function startCampaign(){
+  if(state.countryName)return;
+  const n=state.selectedCountry;
+  if(!n){toast("Select a country on the map first.");return;}
+  if(!state.playerName){toast("Enter your player name first.");return;}
+  if(state.socket?.readyState===WebSocket.OPEN){
+    state.socket.send(JSON.stringify({type:"SELECT_COUNTRY",country:n}));
+    return;
+  }
+  state.countryName=n;state.country=n;state.government=govFor(n);state.countryLocked=true;
+  state.relations={};state.countries.forEach(c=>state.relations[c]=c===n?100:Math.floor(Math.random()*41)-20);
+  state.allies=[];state.enemies=[];saveGame();renderPanel("overview");renderMap();updateResources();
+}
+function setGovernment(gov){
+  if(!state.countryName)return;
+  if(gov===state.government)return;
+  if(state.dip<15){toast("Not enough diplomatic points.");return;}
+  state.dip-=15;state.government=gov;
+  addNews(`${state.countryName} has changed its government classification to ${gov}.`);
+  updateResources();renderPanel("politics");saveGame();renderMap();
+}
+function declareWar(target){
+  if(!state.countryName){toast("Confirm your country first.");return;}
+  if(state.day>0){toast("War declarations unlock when the countdown reaches DAY 0.");return;}
+  if(target===state.countryName){toast("You cannot declare war on yourself.");return;}
+  if(state.socket?.readyState===WebSocket.OPEN){
+    state.socket.send(JSON.stringify({type:"DECLARE_WAR",targetCountry:target}));
+    return;
+  }
+  applyWarDeclared({attacker:state.playerName||"You",attackerCountry:state.countryName,defender:target,targetPlayer:""});
+}
+function allyResponse(target){
+  if(!state.allies.length)return;
+  const ally=state.allies[Math.floor(Math.random()*state.allies.length)];
+  state.formations.push({id:crypto.randomUUID(),name:ally+" Support Group",country:ally,city:(state.cityByCountry[ally]||[])[0]?.name||ally+" Capital",size:10000,readiness:82,side:"ally"});
+  addNews(`${ally} has entered the war on your side and is sending an allied formation.`);
+  renderArmies();renderPanel("forces");
+}
+function enemyPressure(){
+  if(!state.countryName || !state.enemies.length)return;
+  const target=state.enemies[Math.floor(Math.random()*state.enemies.length)];
+  const roll=Math.random();
+  if(roll<0.35){
+    const cities=state.cityByCountry[state.countryName]||[];
+    const city=cities[Math.floor(Math.random()*Math.max(1,cities.length))];
+    state.formations.push({id:crypto.randomUUID(),name:target+" Pressure Group",country:state.countryName,city:city?.name||state.countryName+" frontier",size:10000,readiness:68,side:"enemy"});
+    addNews(`${target} has launched a new strategic pressure event against ${state.countryName}.`);
+    renderArmies();renderPanel("forces");
+  }
+}
+function createFormation(){
+  if(!state.countryName){toast("Start a campaign first.");return;}
+  if(state.manpower<10000){toast("You need 10,000 manpower for one formation.");return;}
+  const cities=state.cityByCountry[state.countryName]||[];
+  const city=cities[0];
+  if(!city){toast("No city node is available yet.");return;}
+  state.manpower-=10000;
+  state.formations.push({id:crypto.randomUUID(),name:`Formation ${state.formations.length+1}`,country:state.countryName,city:city.name,size:10000,readiness:90,side:"player"});
+  addNews(`A new 10,000-person formation has been organized at ${city.name}.`);
+  updateResources();renderArmies();renderPanel("forces");saveGame();
+}
+function advanceDay(){
+  state.day--;
+  if(state.day===0)addNews("The pre-war countdown has reached ZERO. War declarations are now available.");
+  if(state.day<0)state.day=0;
+  state.manpower+=Math.max(250,Math.round(state.manpower*0.002));
+  if(state.day===0 && state.enemies.length)enemyPressure();
+  if(Math.random()<0.12 && state.countryName){
+    state.money+=Math.max(1,Math.round(4+state.research*.2));
+    if(state.stability<95)state.stability+=Math.random()<.5?1:0;
+  }
+  if(Math.random()<0.08 && state.countryName && state.allies.length && state.enemies.length)allyResponse(state.enemies[0]);
+  updateResources();updateTimeBox();renderArmies();
+}
+function tick(){
+  if(!state.running)return;
+  const now=performance.now();
+  const elapsed=now-lastTick;lastTick=now;
+  state.minute += elapsed/1000 * state.speed * 6; // 10 real seconds ~= 1 game hour
+  while(state.minute>=60){state.minute-=60;state.hour++;}
+  while(state.hour>=24){state.hour-=24;advanceDay();}
+  updateTimeBox();
+  requestAnimationFrame(tick);
+}
+function updateTimeBox(){
+  const day=Math.max(0,state.day);
+  $("gameDate").textContent=day>0?`DAY ${day}`:"DAY 0";
+  $("gameClock").textContent=`Year ${state.year} · ${String(Math.floor(state.hour)).padStart(2,"0")}:${String(Math.floor(state.minute)).padStart(2,"0")}`;
+  const box=$("gameState"), text=$("countdownText");
+  if(state.enemies.length){
+    box.className="state war";box.textContent="STATE OF WAR";text.textContent=`Enemies: ${state.enemies.join(", ")} · Allies may assist.`;
+  }else if(day>0){
+    box.className="state peace";box.textContent="PRE-WAR";text.textContent=`War declarations unlock in ${day} game days.`;
+  }else{
+    box.className="state ready";box.textContent="WAR WINDOW";text.textContent="War declarations are unlocked. Diplomacy still matters.";
+  }
+}
+function updateResources(){
+  $("resStability").textContent=state.stability;
+  $("resDip").textContent=fmt(state.dip);
+  $("resMan").textContent=fmtK(state.manpower);
+  $("resMoney").textContent=fmt(state.money);
+}
+function saveGame(){
+  try{localStorage.setItem("wsl-global-save",JSON.stringify({...state,lobby:state.lobby}));}catch(e){}
+}
+function loadGame(){
+  try{
+    const s=JSON.parse(localStorage.getItem("wsl-global-save"));
+    if(!s)return;
+    Object.assign(state,s);
+    addNews(`Saved campaign restored: ${state.countryName||"no country selected"}.`);
+  }catch(e){}
+}
+function resetGame(){
+  localStorage.removeItem("wsl-global-save");location.reload();
+}
+
+function renderPanel(panel){
+  $("panel").dataset.panel=panel;
+  
+function applyLobbyState(players){
+  state.serverLobbyPlayers=Array.isArray(players)?players:[];
+  renderLobby();
+}
+function applyWarJustified(m){
+  const text=`${m.attacker} (${m.attackerCountry}) has justified a war against ${m.defender} (${m.defenderCountry}).`;
+  addNews(text);
+  if(m.targetPlayer===state.playerName)showWarPopup("DIPLOMATIC NOTICE",text);
+  renderPanel($("panel").dataset.panel||"overview");
+}
+function applyWarDeclared(m){
+  const text=`${m.attacker} (${m.attackerCountry}) has declared war upon ${m.defender} (${m.defenderCountry}).`;
+  addNews(text);
+  if(!state.enemies.includes(m.attackerCountry) && m.defenderCountry===state.countryName)state.enemies.push(m.attackerCountry);
+  if(m.attackerCountry===state.countryName && !state.enemies.includes(m.defenderCountry))state.enemies.push(m.defenderCountry);
+  if(m.targetPlayer===state.playerName)showWarPopup("WAR DECLARED",text);
+  renderMap();renderPanel($("panel").dataset.panel||"overview");
+}
+function showWarPopup(title,text){
+  $("modalTitle").textContent=title;
+  $("modalBody").innerHTML=`<div class="card"><h3 style="font-size:22px">${esc(title)}</h3><p style="font-size:15px;line-height:1.7">${esc(text)}</p></div>`;
+  $("modal").classList.add("open");
+}
+function justifyWar(target){
+  if(state.day>0){toast("War justification unlocks at DAY 0.");return;}
+  if(!state.countryName)return;
+  if(state.socket?.readyState===WebSocket.OPEN){
+    state.socket.send(JSON.stringify({type:"JUSTIFY_WAR",targetCountry:target}));
+    return;
+  }
+  toast("A multiplayer server connection is required for player-to-player justification.");
+}
+function connectNetwork(){
+  const input=$("playerNameInput"), status=$("networkStatus"), load=$("lobbyLoading");
+  $("playerJoinBtn").onclick=()=>{
+    const name=input.value.trim();
+    if(name.length<2){status.textContent="Use a name with at least 2 characters.";return;}
+    state.playerName=name;$("playerBadge").textContent=name.toUpperCase();load.style.display="block";status.textContent="Connecting…";
+    const protocol=location.protocol==="https:"?"wss":"ws";
+    const wsUrl=(location.protocol==="file:"?"ws://localhost:3000":`${protocol}://${location.host}`);
+    try{state.socket=new WebSocket(wsUrl)}catch(e){status.textContent="Could not create the server connection.";load.style.display="none";return;}
+    state.socket.onopen=()=>{
+      state.connected=true;status.textContent="Connected. Finding an open 40-player lobby…";
+      state.socket.send(JSON.stringify({type:"JOIN_QUEUE",name:state.playerName}));
+    };
+    state.socket.onerror=()=>{state.connected=false;status.textContent="Server connection failed. Check the Render service.";load.style.display="none";};
+    state.socket.onclose=()=>{state.connected=false;};
+    state.socket.onmessage=ev=>{
+      let m;try{m=JSON.parse(ev.data)}catch{return;}
+      if(m.type==="QUEUE"){
+        status.textContent=`Lobby ${m.lobbyId} · ${m.count}/40 players`;
+      }
+      if(m.type==="LOBBY_ASSIGNED"){
+        state.lobbyId=m.lobbyId;state.lobby.code=m.lobbyId;state.serverLobbyPlayers=m.players||[];
+        status.textContent=`Assigned to Lobby ${m.lobbyId}.`;
+        $("networkEntry").classList.add("hidden");load.style.display="none";
+        renderLobby();
+        toast(`Welcome, ${state.playerName}. Lobby ${m.lobbyId}.`);
+      }
+      if(m.type==="LOBBY_STATE"){state.serverLobbyPlayers=m.players||[];renderLobby();}
+      if(m.type==="COUNTRY_CONFIRMED"){
+        state.countryName=m.country;state.country=m.country;state.selectedCountry=m.country;state.countryLocked=true;state.government=govFor(m.country);
+        state.relations={};state.countries.forEach(c=>state.relations[c]=c===m.country?100:0);
+        renderMap();renderPanel("overview");toast(`Country registered: ${m.country}`);
+      }
+      if(m.type==="COUNTRY_TAKEN")toast("That country is already controlled by another player in this lobby.");
+      if(m.type==="WAR_JUSTIFIED")applyWarJustified(m);
+      if(m.type==="WAR_DECLARED")applyWarDeclared(m);
+      if(m.type==="DAY_UPDATE"){state.day=m.day;updateTimeBox();}
+      if(m.type==="ERROR"){toast(m.message||"Server error.");}
+    };
+  };
+  input.addEventListener("keydown",e=>{if(e.key==="Enter")$("playerJoinBtn").click();});
+}
+
+document.querySelectorAll(".rail button").forEach(b=>b.classList.toggle("active",b.dataset.panel===panel));
+  const map={overview:renderOverview,country:renderCountry,diplomacy:renderDiplomacy,research:renderResearch,forces:renderForces,economy:renderEconomy,politics:renderPolitics,news:renderNews,lobby:renderLobby,settings:renderSettings};
+  (map[panel]||renderOverview)();
+}
+function renderOverview(){
+  const n=state.countryName;
+  $("panel").innerHTML=`
+    <div class="panel-title"><h2>🏠 Command Overview</h2><span class="pill">${n?esc(n):"No country"}</span></div>
+    <div class="card"><h3>Campaign status</h3>
+      ${n?`<div class="grid2">
+        <div class="stat"><b>${esc(n)}</b><span>Locked player country</span></div>
+        <div class="stat"><b>${state.government}</b><span>Government</span></div>
+        <div class="stat"><b>${state.day}</b><span>Days until war window</span></div>
+        <div class="stat"><b>${state.enemies.length}</b><span>Active enemies</span></div>
+      </div>`:
+      `<p class="muted">Enter your player name, select a country on the map, then confirm it. Your country cannot be changed after starting.</p>
+       <button class="btn primary" onclick="startCampaign()">🚩 Start campaign as selected country</button>`}
+    </div>
+    <div class="card"><h3>📰 Situation</h3>${state.news.slice(0,5).map(x=>`<div class="small" style="margin:6px 0"><span class="pill">D${x.day}</span> ${esc(x.text)}</div>`).join("")||"<span class='muted'>No events yet.</span>"}</div>
+    <div class="card"><h3>🌍 World scale</h3>
+      <table><tr><th>System</th><th>Status</th></tr>
+      <tr><td>Countries</td><td>${fmt(state.countries.length)}</td></tr>
+      <tr><td>City nodes</td><td>${fmt(state.cities.length)}</td></tr>
+      <tr><td>Game time</td><td>${state.running?"Running":"Paused"}</td></tr>
+      <tr><td>Multiplayer</td><td>Lobby UI ready · live WebSocket server</td></tr></table>
+    </div>`;
+}
+function renderCountry(){
+  const n=state.selectedCountry||state.countryName;
+  const cities=state.cityByCountry[n]||[];
+  $("panel").innerHTML=`
+    <div class="panel-title"><h2>🏳️ Country</h2><span class="pill">${n?esc(n):"Select one"}</span></div>
+    <div class="card">
+      ${n?`<div class="grid2">
+        <div class="stat"><b>${esc(govFor(n))}</b><span>Game government family</span></div>
+        <div class="stat"><b>${cities.length}</b><span>City nodes loaded</span></div>
+        <div class="stat"><b>${state.relations[n]??0}</b><span>Relation to you</span></div>
+        <div class="stat"><b>${n===state.countryName?"PLAYER":"FOREIGN"}</b><span>Control</span></div>
+      </div>`:"<p class='muted'>Click any country on the map.</p>"}
+    </div>
+    <div class="card"><h3>🏙️ City network</h3>
+      <table><tr><th>City</th><th>Type</th><th>Population</th></tr>
+      ${cities.map(c=>`<tr><td>${esc(c.name)}</td><td>${c.capital?"Capital":"City node"}</td><td>${c.pop?fmtK(c.pop):"—"}</td></tr>`).join("")}</table>
+    </div>`;
+}
+function renderDiplomacy(){
+  const q=(window.dipQuery||"").toLowerCase();
+  const rows=state.countries.filter(n=>n.toLowerCase().includes(q)).slice(0,120);
+  $("panel").innerHTML=`
+    <div class="panel-title"><h2>🤝 Diplomacy</h2><span class="pill">${state.dip} DP</span></div>
+    <div class="card"><input placeholder="Search country…" value="${esc(window.dipQuery||"")}" oninput="window.dipQuery=this.value;renderDiplomacy()"></div>
+    <div class="card"><h3>Global diplomatic table</h3>
+      <table><tr><th>Country</th><th>Gov.</th><th>Relation</th><th>Status</th></tr>
+      ${rows.map(n=>{
+        const status=n===state.countryName?"YOU":state.enemies.includes(n)?"ENEMY":state.allies.includes(n)?"ALLY":"NEUTRAL";
+        return `<tr title="Click to inspect ${esc(n)}" onclick="selectCountry('${esc(n).replace(/'/g,"\\\\'")}')"><td>${esc(n)}</td><td>${govFor(n)}</td><td>${state.relations[n]??0}</td><td>${status}</td></tr>`;
+      }).join("")}</table>
+    </div>
+    <div class="card"><h3>Actions for ${esc(state.selectedCountry||"selected country")}</h3>
+      ${state.selectedCountry&&state.selectedCountry!==state.countryName?`
+      <button class="btn" onclick="improveRelation('${esc(state.selectedCountry).replace(/'/g,"\\\\'")}')">🤝 Improve relations · 10 DP</button>
+      <button class="btn good" onclick="makeAlly('${esc(state.selectedCountry).replace(/'/g,"\\\\'")}')">🛡️ Propose alliance · 20 DP</button>
+      <button class="btn bad" ${state.day>0?"disabled":""} onclick="declareWar('${esc(state.selectedCountry).replace(/'/g,"\\\\'")}')">⚔️ Declare war ${state.day>0?"(locked until DAY 0)":""}</button>`:"<span class='muted'>Select a foreign country first.</span>"}
+    </div>
+    <div class="card"><h3>🛡️ Alliances</h3><div>${state.allies.length?state.allies.map(a=>`<span class="pill" style="margin:2px">${esc(a)}</span>`).join(" "):"<span class='muted'>No allies.</span>"}</div></div>`;
+}
+function improveRelation(n){
+  if(state.dip<10){toast("Not enough diplomatic points.");return;}
+  state.dip-=10;state.relations[n]=Math.min(100,(state.relations[n]??0)+15);
+  addNews(`${state.countryName} improved diplomatic relations with ${n}.`);
+  updateResources();renderDiplomacy();saveGame();
+}
+function makeAlly(n){
+  if(state.dip<20){toast("Not enough diplomatic points.");return;}
+  if(state.allies.includes(n)){toast("Already allied.");return;}
+  state.dip-=20;state.allies.push(n);state.relations[n]=Math.min(100,(state.relations[n]??0)+20);
+  addNews(`${n} accepted an alliance with ${state.countryName}. Allies can assist during war.`);
+  updateResources();renderDiplomacy();renderMap();saveGame();
+}
+function renderResearch(){
+  const items=[
+    ["🏗️","Infrastructure","Housing Capacity","Increase manpower growth and city capacity.",20],
+    ["🚚","Army & Logistics","Supply Network","Improve formation readiness and movement reliability.",25],
+    ["✈️","Air","Airfield Network","Increase strategic reach and readiness.",30],
+    ["⚓","Navy / Maritime","Port Administration","Improve maritime logistics and overseas support.",30],
+    ["💰","Economy","Industrial Planning","Increase treasury growth.",35],
+    ["👥","Society","Civic Administration","Reduce stability losses from major events.",25]
+  ];
+  $("panel").innerHTML=`<div class="panel-title"><h2>🧪 Research</h2><span class="pill">${state.research} RP</span></div>
+  <div class="card"><p class="muted small">Hover each item for a short explanation. Research is intentionally strategic and abstract.</p>
+  <div class="research-grid">${items.map((x,i)=>`<div class="research" title="${x[3]}" onclick="researchItem(${i})"><b>${x[0]} ${x[2]}</b><div class="small">${x[1]}</div><div class="desc">${x[3]}</div><div class="cost">Cost: ${x[4]} RP</div></div>`).join("")}</div></div>
+  <div class="card"><h3>Research ledger</h3><table><tr><th>Category</th><th>Effect</th><th>Status</th></tr>
+  ${items.map(x=>`<tr><td>${x[1]}</td><td>${x[3]}</td><td>${state.research>=x[4]?"Available":"Needs "+x[4]+" RP"}</td></tr>`).join("")}</table></div>`;
+}
+function researchItem(i){
+  const costs=[20,25,30,30,35,25], names=["Housing Capacity","Supply Network","Airfield Network","Port Administration","Industrial Planning","Civic Administration"];
+  const cost=costs[i];
+  if(state.research<cost){toast(`You need ${cost} RP. Current RP: ${state.research}`);return;}
+  state.research-=cost;
+  addNews(`${state.countryName||"Your country"} completed research: ${names[i]}.`);
+  renderResearch();saveGame();
+}
+function renderForces(){
+  $("panel").innerHTML=`<div class="panel-title"><h2>🪖 Forces</h2><span class="pill">${fmt(state.manpower)} manpower</span></div>
+  <div class="card"><h3>Formation rule</h3><p class="muted">Every formation represents 10,000 people. Movement is city-to-city and strategic; combat outcomes are abstracted.</p>
+  <button class="btn primary" onclick="createFormation()">➕ Create 10,000-person formation</button></div>
+  <div class="card"><h3>Formation table</h3><table><tr><th>Name</th><th>Side</th><th>Location</th><th>Size</th><th>Readiness</th></tr>
+  ${state.formations.map(f=>`<tr><td>${esc(f.name)}</td><td>${f.side}</td><td>${esc(f.city)}</td><td>${fmt(f.size)}</td><td>${f.readiness}%</td></tr>`).join("")||"<tr><td colspan='5' class='muted'>No formations.</td></tr>"}</table></div>
+  <div class="card"><h3>War participation</h3><table><tr><th>Faction</th><th>Countries</th></tr><tr><td>Allies</td><td>${state.allies.join(", ")||"None"}</td></tr><tr><td>Enemies</td><td>${state.enemies.join(", ")||"None"}</td></tr></table></div>`;
+}
+function renderEconomy(){
+  $("panel").innerHTML=`<div class="panel-title"><h2>💰 Economy</h2><span class="pill">${state.money} treasury</span></div>
+  <div class="card"><div class="grid2"><div class="stat"><b>${state.money}</b><span>Treasury</span></div><div class="stat"><b>${state.research}</b><span>Research points</span></div></div></div>
+  <div class="card"><h3>Economic table</h3><table><tr><th>System</th><th>Status</th><th>Hover detail</th></tr>
+  <tr title="Treasury supports projects and strategic actions."><td>💵 Treasury</td><td>${state.money}</td><td>Grows through economic ticks.</td></tr>
+  <tr title="Manpower growth represents long-run population capacity."><td>👥 Manpower</td><td>${fmt(state.manpower)}</td><td>Infrastructure research can improve growth.</td></tr>
+  <tr title="Research points unlock strategic improvements."><td>🧪 Research</td><td>${state.research}</td><td>Used for research projects.</td></tr></table></div>`;
+}
+function renderPolitics(){
+  $("panel").innerHTML=`<div class="panel-title"><h2>🏛️ Politics</h2><span class="pill">${state.government}</span></div>
+  <div class="card"><h3>Government</h3><p class="muted">The four government families are a simplified game taxonomy. Your starting classification is based on the country's present-day form as represented in the game.</p>
+  <table><tr><th>Government</th><th>Game effect</th><th>Change</th></tr>
+  ${GOVS.map(g=>`<tr><td>${g}</td><td>${g==="Democracy"?"Balanced diplomacy":g==="Monarchy"?"Stability focus":g==="Communism"?"State-planning focus":"Mobilization focus"}</td><td><button class="btn" onclick="setGovernment('${g}')">${state.government===g?"Current":"Choose · 15 DP"}</button></td></tr>`).join("")}</table></div>
+  <div class="card"><h3>Stability</h3><div class="stat"><b>${state.stability}</b><span>Political stability</span></div></div>`;
+}
+function renderNews(){
+  $("panel").innerHTML=`<div class="panel-title"><h2>📰 News archive</h2><span class="pill">${state.news.length}</span></div>
+  <div class="card"><table><tr><th>Day</th><th>Event</th></tr>${state.news.map(n=>`<tr><td>D${n.day}</td><td>${esc(n.text)}</td></tr>`).join("")||"<tr><td colspan='2'>No news.</td></tr>"}</table></div>`;
+}
+function renderLobby(){
+  const slots=Array.from({length:40},(_,i)=>state.serverLobbyPlayers[i]||{name:"Open seat",country:"—",status:"Waiting"});
+  $("panel").innerHTML=`<div class="panel-title"><h2>👥 Multiplayer Lobby</h2><span class="pill">${state.lobbyId?`Lobby ${esc(state.lobbyId)}`:"Not connected"}</span></div>
+  <div class="card"><h3>Live lobby</h3>
+    <div class="grid2">
+      <div class="stat"><b>${state.serverLobbyPlayers.length}/40</b><span>Players in this lobby</span></div>
+      <div class="stat"><b>${state.connected?"ONLINE":"OFFLINE"}</b><span>Server connection</span></div>
+    </div>
+    <p class="muted small" style="margin-top:8px">When a lobby reaches 40 players, new arrivals are automatically assigned to the next lobby. No lobby code is required.</p>
+  </div>
+  <div class="card"><h3>Players</h3><div class="lobbyGrid">
+    ${slots.map((p,i)=>`<div class="liveSlot ${p.name===state.playerName?"you":""}">
+      <div class="num">SEAT ${i+1}</div><div class="name">${esc(p.name)}</div><div class="country">${esc(p.country||"—")}</div>
+    </div>`).join("")}
+  </div></div>`;
+}
+function renderSettings(){
+  $("panel").innerHTML=`<div class="panel-title"><h2>⚙️ Campaign</h2></div>
+  <div class="card"><h3>Game time</h3><table><tr><th>Setting</th><th>Value</th></tr><tr><td>Speed</td><td>${state.speed}×</td></tr><tr><td>State</td><td>${state.running?"Running":"Paused"}</td></tr><tr><td>Countdown</td><td>${state.day} days</td></tr></table>
+  <button class="btn" onclick="state.running=!state.running;renderSettings();">⏯ ${state.running?"Pause":"Resume"} time</button>
+  <button class="btn" onclick="state.speed=state.speed===1?2:state.speed===2?4:1;renderSettings();">⚡ Change speed</button></div>
+  <div class="card"><h3>Save data</h3><button class="btn good" onclick="saveGame();toast('Campaign saved locally.')">💾 Save campaign</button><button class="btn bad" onclick="resetGame()">♻️ Reset campaign</button></div>`;
+}
+
+document.querySelectorAll(".rail button").forEach(b=>b.addEventListener("click",()=>renderPanel(b.dataset.panel)));
+$("pauseBtn").addEventListener("click",()=>{state.running=!state.running;$("pauseBtn").textContent=state.running?"⏸ Pause":"▶ Resume";});
+$("speedBtn").addEventListener("click",()=>{state.speed=state.speed===1?2:state.speed===2?4:1;$("speedBtn").textContent=`⚡ ${state.speed}×`;});
+$("modeBtn").addEventListener("click",()=>{
+  const modes=["Political","Diplomacy","Government","Stability"];
+  state.mode=modes[(modes.indexOf(state.mode)+1)%modes.length];
+  $("modeBtn").textContent="🗺 "+state.mode;renderMap();
+});
+$("modalClose").addEventListener("click",()=>$("modal").classList.remove("open"));
+window.addEventListener("resize",resize);
+mapSvg.call(d3.zoom().scaleExtent([1,8]).on("zoom",e=>{g.attr("transform",e.transform);state.zoom=e.transform.k;renderCities();}));
+setInterval(setNewsTicker,4500);
+setInterval(()=>{if(state.countryName)saveGame();},10000);
+
+window.startCampaign=startCampaign;window.selectCountry=selectCountry;window.renderPanel=renderPanel;
+window.improveRelation=improveRelation;window.makeAlly=makeAlly;window.declareWar=declareWar;
+window.setGovernment=setGovernment;window.researchItem=researchItem;window.createFormation=createFormation;
+window.addBotSlot=addBotSlot;window.copyLobbyCode=copyLobbyCode;window.resetGame=resetGame;
+
+loadGame();
+updateResources();updateTimeBox();renderPanel("overview");
+connectNetwork();
+loadWorld().then(()=>resize());
+requestAnimationFrame(tick);
+})();
 </script>
 </body>
 </html>
