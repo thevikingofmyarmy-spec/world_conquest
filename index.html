@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>World Strategy — Multiplayer</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Libre+Baskerville:wght@400;700&display=swap');
+:root{--sea:#174f7a;--sea2:#0d3552;--ink:#17212b;--paper:#eee2c2;--gold:#b28a3c}
+*{box-sizing:border-box}body{margin:0;background:var(--sea2);color:var(--ink);font-family:"Libre Baskerville",Georgia,serif}
+button,input,select{font:inherit}.shell{min-height:100vh;display:grid;grid-template-rows:auto 1fr auto}
+header{background:#102c42;color:#f5e9c8;border-bottom:3px solid var(--gold);padding:12px 18px;display:flex;justify-content:space-between;align-items:center}
+.brand,h1,h2,h3{font-family:Cinzel,Georgia,serif}.brand{font-size:1.35rem}.status{font-size:.85rem}
+main{display:grid;grid-template-columns:220px 1fr;min-height:0}.side{background:#d9c79a;border-right:3px solid var(--gold);padding:18px}
+.side p{font-size:.82rem;line-height:1.5}.panel{background:#f4e8c4f5;margin:14px 0;padding:14px;border:1px solid #9c7b38;box-shadow:0 4px 12px #071a2870}
+.mapwrap{position:relative;min-height:620px;background:var(--sea);overflow:hidden}
+#map{width:100%;height:100%;min-height:620px;background:linear-gradient(#1c6394,#174f7a)}
+.mapgrid{position:absolute;inset:0;background-image:linear-gradient(#ffffff10 1px,transparent 1px),linear-gradient(90deg,#ffffff10 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+.mapcontent{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#f7edcf;text-align:center}
+.globe{width:min(70vw,760px);height:min(50vw,430px);border:2px solid #d9c79a99;border-radius:50%;position:relative}
+.continent{position:absolute;background:#d8c99f;border:2px solid #8c794e;box-shadow:0 4px 8px #06172566}
+.a{width:230px;height:120px;left:18%;top:18%;transform:rotate(-9deg);border-radius:45% 55% 50% 40%}
+.b{width:170px;height:230px;left:42%;top:27%;transform:rotate(10deg);border-radius:48% 45% 55% 42%}
+.c{width:210px;height:130px;right:11%;top:22%;transform:rotate(6deg);border-radius:55% 42% 50% 44%}
+.d{width:120px;height:210px;right:23%;bottom:8%;transform:rotate(18deg);border-radius:48%}
+.city{position:absolute;width:16px;height:16px;border:2px solid #f5e9c8;border-radius:50%;background:#8a2525;box-shadow:0 0 0 3px #17212b80;cursor:pointer}
+.city span{display:none;position:absolute;left:18px;top:-7px;white-space:nowrap;background:#102c42;color:#f5e9c8;padding:4px 7px;border:1px solid var(--gold);font-size:11px}
+.city:hover span{display:block}
+.overlay{position:absolute;left:16px;right:16px;top:16px;display:flex;justify-content:space-between;pointer-events:none}
+.timebox,.news{background:#102c42e8;color:#f5e9c8;border:1px solid var(--gold);padding:9px 12px;box-shadow:0 4px 12px #06172577}
+.news{max-width:65%;font-size:.8rem}
+footer{background:#102c42;color:#eadcb8;padding:8px 14px;text-align:center;font-size:.75rem}
+.modal{position:fixed;inset:0;background:#061725cc;display:flex;align-items:center;justify-content:center;z-index:20}
+.modal.hidden{display:none}.dialog{width:min(520px,92vw);background:#eee2c2;border:3px double #9c7b38;padding:24px;box-shadow:0 18px 50px #0009}
+.dialog input,.dialog select{width:100%;padding:11px;margin:8px 0 12px;background:#f7edcf;border:1px solid #8c794e;color:var(--ink)}
+.btn{border:1px solid #765b29;background:#c5a15c;color:#1b1b18;padding:9px 13px;cursor:pointer}.btn:hover{background:#d6b875}
+.muted{opacity:.7;font-size:.82rem}.queue{text-align:center;padding:35px}.spinner{width:38px;height:38px;border:4px solid #a48b55;border-top-color:#174f7a;border-radius:50%;animation:spin 1s linear infinite;margin:18px auto}
+@keyframes spin{to{transform:rotate(360deg)}}@media(max-width:800px){main{grid-template-columns:1fr}.side{border-right:0;border-bottom:3px solid var(--gold)}.mapwrap{min-height:500px}.news{max-width:58%}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header><div class="brand">WORLD STRATEGY</div><div id="connection" class="status">Not connected</div></header>
+<main>
+<aside class="side">
+<h2>Command</h2>
+<div class="panel"><b id="playerLabel">No player</b><p id="countryLabel">Country not selected</p><p id="lobbyLabel">Lobby —</p></div>
+<div class="panel"><h3>War News</h3><div id="newsArchive" class="muted">No war notices yet.</div></div>
+<div class="panel"><h3>Rules</h3><p>40 players maximum per lobby. Assignment is automatic. News is limited to war justification and declaration notices.</p></div>
+</aside>
+<section class="mapwrap">
+<div id="map"><div class="mapgrid"></div><div class="mapcontent"><div class="globe">
+<div class="continent a"></div><div class="continent b"></div><div class="continent c"></div><div class="continent d"></div>
+<div class="city" style="left:30%;top:38%"><span>London</span></div>
+<div class="city" style="left:47%;top:45%"><span>Cairo</span></div>
+<div class="city" style="left:66%;top:39%"><span>Delhi</span></div>
+<div class="city" style="left:76%;top:57%"><span>Tokyo</span></div>
+<div class="city" style="left:25%;top:57%"><span>Washington</span></div>
+<div class="city" style="left:54%;top:67%"><span>Cape Town</span></div>
+</div></div></div>
+<div class="overlay"><div class="timebox" id="timebox">DAY 30 · PRE-WAR</div><div class="news" id="newsTicker">Awaiting the first diplomatic notice.</div></div>
+</section>
+</main>
+<footer>Prototype multiplayer client · 40-player lobby capacity</footer>
+</div>
+
+<div id="entryModal" class="modal">
+<div class="dialog"><h1>Enter the World</h1>
+<p>Choose your player name. Your name will be registered to the country you later select.</p>
+<input id="nameInput" maxlength="20" placeholder="Player name" autocomplete="off">
+<button id="joinBtn" class="btn">ENTER WORLD</button><p id="entryError" class="muted"></p>
+</div></div>
+
+<div id="queueModal" class="modal hidden"><div class="dialog queue">
+<h1>Entering World...</h1><div class="spinner"></div><div id="queueText">Finding an open lobby...</div>
+<p class="muted">Please wait while the server assigns your lobby.</p></div></div>
+
+<div id="countryModal" class="modal hidden"><div class="dialog">
+<h1>Choose Your Country</h1><p id="countryHelp">Select a country. Your choice is permanent for this campaign.</p>
+<select id="countrySelect"><option>France</option><option>Germany</option><option>India</option><option>Japan</option><option>Brazil</option><option>United Kingdom</option><option>United States</option><option>Canada</option><option>Egypt</option><option>Australia</option></select>
+<button id="confirmCountry" class="btn">CONFIRM COUNTRY</button><p id="countryError" class="muted"></p>
+</div></div>
+
+<div id="warModal" class="modal hidden"><div class="dialog">
+<h1 id="warTitle">DIPLOMATIC NOTICE</h1><p id="warMessage"></p>
+<button class="btn" onclick="document.getElementById('warModal').classList.add('hidden')">CLOSE</button>
+</div></div>
+
+<script>
+const state={ws:null,playerName:"",country:"",lobbyId:""};
+const $=id=>document.getElementById(id);
+const params=new URLSearchParams(location.search);
+const WS_URL=params.get("server") || ((location.protocol==="https:"?"wss://":"ws://")+location.host);
+function setConnection(t){$("connection").textContent=t}
+function show(id){$(id).classList.remove("hidden")} function hide(id){$(id).classList.add("hidden")}
+function addNews(text){$("newsTicker").textContent=text;const line=document.createElement("div");line.textContent=text;line.style.marginBottom="8px";const a=$("newsArchive");if(a.classList.contains("muted"))a.classList.remove("muted");a.prepend(line)}
+function popup(title,msg){$("warTitle").textContent=title;$("warMessage").textContent=msg;show("warModal")}
+function send(type,payload={}){if(state.ws?.readyState===WebSocket.OPEN)state.ws.send(JSON.stringify({type,...payload}))}
+function connect(){
+try{state.ws=new WebSocket(WS_URL)}catch(e){$("entryError").textContent="Could not create a connection.";return}
+state.ws.onopen=()=>{setConnection("Connected");send("JOIN_QUEUE",{name:state.playerName})};
+state.ws.onclose=()=>setConnection("Disconnected — refresh to reconnect");
+state.ws.onerror=()=>setConnection("Connection error");
+state.ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch{return}
+if(m.type==="QUEUE"){hide("entryModal");show("queueModal");$("queueText").textContent="Lobby "+m.lobbyId+" · "+m.count+"/40 players"}
+if(m.type==="LOBBY_ASSIGNED"){state.lobbyId=m.lobbyId;$("lobbyLabel").textContent="Lobby "+m.lobbyId;hide("queueModal");show("countryModal");$("countryHelp").textContent="Lobby "+m.lobbyId+" is ready. Select your country."}
+if(m.type==="COUNTRY_CONFIRMED"){state.country=m.country;$("playerLabel").textContent=state.playerName;$("countryLabel").textContent=m.country;hide("countryModal")}
+if(m.type==="COUNTRY_TAKEN")$("countryError").textContent="That country is already controlled by another player in this lobby.";
+if(m.type==="WAR_JUSTIFIED"){const t=m.attacker+" ("+m.attackerCountry+") has justified a war against "+m.defender+" ("+m.defenderCountry+").";addNews("WAR JUSTIFIED — "+t);if(m.targetPlayer===state.playerName)popup("DIPLOMATIC NOTICE",t)}
+if(m.type==="WAR_DECLARED"){const t=m.attacker+" ("+m.attackerCountry+") has declared war upon "+m.defender+" ("+m.defenderCountry+").";addNews("WAR DECLARED — "+t);if(m.targetPlayer===state.playerName)popup("WAR DECLARED",t)}
+if(m.type==="DAY_UPDATE")$("timebox").textContent="DAY "+m.day+" · "+(m.day===0?"WAR WINDOW":"PRE-WAR");
+if(m.type==="ERROR")$("entryError").textContent=m.message||"Server error.";
+}}
+$("joinBtn").onclick=()=>{const n=$("nameInput").value.trim();if(n.length<2){$("entryError").textContent="Name must be at least 2 characters.";return}state.playerName=n;connect()};
+$("confirmCountry").onclick=()=>send("SELECT_COUNTRY",{country:$("countrySelect").value});
+$("nameInput").addEventListener("keydown",e=>{if(e.key==="Enter")$("joinBtn").click()});
+</script>
+</body>
+</html>
